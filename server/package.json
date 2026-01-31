@@ -1,0 +1,26 @@
+{
+  "name": "facebook-video-downloader-server",
+  "version": "1.0.0",
+  "description": "Backend API for Facebook Video Downloader",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-validator": "^7.0.1"
+  },
+  "keywords": [
+    "facebook",
+    "video",
+    "downloader",
+    "yt-dlp"
+  ],
+  "author": "",
+  "license": "MIT"
+}
