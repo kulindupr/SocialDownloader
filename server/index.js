@@ -5,13 +5,16 @@ import videoRoutes from './routes/video.js';
 import youtubeRoutes from './routes/youtube.js';
 import instagramRoutes from './routes/instagram.js';
 import tiktokRoutes from './routes/tiktok.js';
+import { execSync } from 'child_process';
 
 dotenv.config();
 
 const app = express();
+
+// Use Railway's assigned PORT or fallback for local dev
 const PORT = parseInt(process.env.PORT, 10) || 5000;
 
-// CORS: Build allowed origins from FRONTEND_URL
+// CORS: allowed origins
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   'http://localhost:5173',
@@ -21,14 +24,12 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (health checks, curl, mobile apps)
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.warn(`CORS blocked: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
+      return callback(null, true);
     }
+    console.warn(`CORS blocked: ${origin}`);
+    return callback(new Error('Not allowed by CORS'));
   },
   methods: ['GET', 'POST'],
   credentials: true
@@ -58,22 +59,38 @@ app.use((req, res) => {
   res.status(404).json({ success: false, error: 'Route not found' });
 });
 
-// Start server
+// yt-dlp detection
+let ytdlpPath = '';
+try {
+  ytdlpPath = execSync('which yt-dlp').toString().trim();
+  console.log(`✅ Found yt-dlp at: ${ytdlpPath}`);
+} catch (err) {
+  console.error('❌ yt-dlp not found! Install yt-dlp to enable downloads.');
+}
+
+// Start server and listen on all interfaces
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📡 Health check: /health`);
+  console.log(`📡 Health check available at /health`);
   if (process.env.FRONTEND_URL) {
     console.log(`🌐 CORS enabled for: ${process.env.FRONTEND_URL}`);
   }
+  if (ytdlpPath) {
+    console.log(`🎬 yt-dlp ready for use`);
+  }
 });
 
-// Graceful shutdown - keep container alive
+// Graceful shutdown
 process.on('SIGTERM', () => {
-  console.log('SIGTERM received, keeping server alive...');
+  console.log('⚠️ SIGTERM received, shutting down gracefully...');
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
 });
 
 process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully...');
+  console.log('⚠️ SIGINT received, shutting down gracefully...');
   server.close(() => {
     console.log('Server closed');
     process.exit(0);
