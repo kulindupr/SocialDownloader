@@ -2,7 +2,6 @@
 
 A modern, feature-rich social media video downloader supporting **YouTube**, **Facebook**, **Instagram**, and **TikTok**. Built with React and Node.js, featuring a beautiful iOS-style glassmorphism UI.
 
-
 ![SocialDownloader](https://img.shields.io/badge/Version-1.0.0-blue)
 ![Node.js](https://img.shields.io/badge/Node.js-18+-green)
 ![React](https://img.shields.io/badge/React-18-61DAFB)
