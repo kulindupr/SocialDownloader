@@ -5,7 +5,7 @@ import videoRoutes from './routes/video.js';
 import youtubeRoutes from './routes/youtube.js';
 import instagramRoutes from './routes/instagram.js';
 import tiktokRoutes from './routes/tiktok.js';
-import { execSync } from 'child_process';
+import { YTDLP_PATH } from './utils/ytdlpPath.js';
 
 dotenv.config();
 
@@ -59,15 +59,6 @@ app.use((req, res) => {
   res.status(404).json({ success: false, error: 'Route not found' });
 });
 
-// yt-dlp detection
-let ytdlpPath = '';
-try {
-  ytdlpPath = execSync('which yt-dlp').toString().trim();
-  console.log(`✅ Found yt-dlp at: ${ytdlpPath}`);
-} catch (err) {
-  console.error('❌ yt-dlp not found! Install yt-dlp to enable downloads.');
-}
-
 // Start server and listen on all interfaces
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
@@ -75,8 +66,8 @@ const server = app.listen(PORT, '0.0.0.0', () => {
   if (process.env.FRONTEND_URL) {
     console.log(`🌐 CORS enabled for: ${process.env.FRONTEND_URL}`);
   }
-  if (ytdlpPath) {
-    console.log(`🎬 yt-dlp ready for use`);
+  if (YTDLP_PATH) {
+    console.log(`🎬 yt-dlp ready: ${YTDLP_PATH}`);
   }
 });
 
