@@ -3,49 +3,69 @@ import { existsSync, statSync, readFileSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import { tmpdir, homedir } from 'os';
 import { YTDLP_PATH } from './ytdlpPath.js';
+import { getYouTubeCookiesArgs } from './cookies.js';
 
-// Extract YouTube video info
+// Extract YouTube video info with retry logic
 export const extractYouTubeInfo = (url) => {
   return new Promise((resolve, reject) => {
-    const ytdlp = spawn(YTDLP_PATH, [
-      '--dump-json',
-      '--no-warnings',
-      '--no-check-certificate',
-      '--geo-bypass',
-      '--force-ipv4',
-      '--extractor-args', 'youtube:player_client=web,android',
-      '--user-agent', 'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
-      url
-    ]);
+    // Try different player clients in order
+    const tryExtract = (playerClients, attempt = 0) => {
+      const currentClient = playerClients[attempt] || 'android';
+      const cookiesArgs = getYouTubeCookiesArgs();
+      
+      const args = [
+        '--dump-json',
+        '--no-warnings',
+        '--no-check-certificate',
+        '--geo-bypass',
+        '--force-ipv4',
+        '--socket-timeout', '30',
+        '--extractor-args', `youtube:player_client=${currentClient}`,
+        '--user-agent', 'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+        ...cookiesArgs,
+        url
+      ];
 
-    let stdout = '';
-    let stderr = '';
+      const ytdlp = spawn(YTDLP_PATH, args);
 
-    ytdlp.stdout.on('data', (data) => {
-      stdout += data.toString();
-    });
+      let stdout = '';
+      let stderr = '';
 
-    ytdlp.stderr.on('data', (data) => {
-      stderr += data.toString();
-    });
+      ytdlp.stdout.on('data', (data) => {
+        stdout += data.toString();
+      });
 
-    ytdlp.on('close', (code) => {
-      if (code !== 0) {
-        reject(new Error(stderr || 'Failed to extract video info'));
-        return;
-      }
+      ytdlp.stderr.on('data', (data) => {
+        stderr += data.toString();
+      });
 
-      try {
-        const info = JSON.parse(stdout);
-        resolve(info);
-      } catch (error) {
-        reject(new Error('Failed to parse video info'));
-      }
-    });
+      ytdlp.on('close', (code) => {
+        if (code !== 0) {
+          // Try next player client if available
+          if (attempt < playerClients.length - 1) {
+            console.log(`YouTube: Trying player client ${playerClients[attempt + 1]}...`);
+            tryExtract(playerClients, attempt + 1);
+            return;
+          }
+          reject(new Error(stderr || 'Failed to extract video info'));
+          return;
+        }
 
-    ytdlp.on('error', (error) => {
-      reject(error);
-    });
+        try {
+          const info = JSON.parse(stdout);
+          resolve(info);
+        } catch (error) {
+          reject(new Error('Failed to parse video info'));
+        }
+      });
+
+      ytdlp.on('error', (error) => {
+        reject(error);
+      });
+    };
+
+    // Try these player clients in order
+    tryExtract(['android', 'web', 'ios', 'mweb']);
   });
 };
 

@@ -1,17 +1,24 @@
 import { spawn } from 'child_process';
 import { YTDLP_PATH } from './ytdlpPath.js';
+import { getTikTokCookiesArgs } from './cookies.js';
 
 export const extractTikTokInfo = (url) => {
   return new Promise((resolve, reject) => {
-    const ytdlp = spawn(YTDLP_PATH, [
+    const cookiesArgs = getTikTokCookiesArgs();
+    
+    const args = [
       '--dump-json',
       '--no-warnings',
       '--no-check-certificate',
       '--geo-bypass',
       '--force-ipv4',
+      '--socket-timeout', '30',
       '--user-agent', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+      ...cookiesArgs,
       url
-    ]);
+    ];
+
+    const ytdlp = spawn(YTDLP_PATH, args);
 
     let stdout = '';
     let stderr = '';

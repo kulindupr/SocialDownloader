@@ -3,19 +3,26 @@ import { existsSync, statSync, readFileSync, unlinkSync, createReadStream } from
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { YTDLP_PATH } from './ytdlpPath.js';
+import { getInstagramCookiesArgs } from './cookies.js';
 
 export const extractInstagramInfo = (url) => {
   return new Promise((resolve, reject) => {
-    const ytdlp = spawn(YTDLP_PATH, [
+    const cookiesArgs = getInstagramCookiesArgs();
+    
+    const args = [
       '--dump-json',
       '--no-warnings',
       '--no-playlist',
       '--no-check-certificate',
       '--geo-bypass',
       '--force-ipv4',
+      '--socket-timeout', '30',
       '--user-agent', 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+      ...cookiesArgs,
       url
-    ]);
+    ];
+
+    const ytdlp = spawn(YTDLP_PATH, args);
 
     let stdout = '';
     let stderr = '';

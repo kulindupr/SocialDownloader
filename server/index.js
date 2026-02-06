@@ -6,8 +6,12 @@ import youtubeRoutes from './routes/youtube.js';
 import instagramRoutes from './routes/instagram.js';
 import tiktokRoutes from './routes/tiktok.js';
 import { YTDLP_PATH } from './utils/ytdlpPath.js';
+import { initializeCookies } from './utils/cookies.js';
 
 dotenv.config();
+
+// Initialize cookies from environment variables
+const cookieStatus = initializeCookies();
 
 const app = express();
 
@@ -49,7 +53,8 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    ytdlp: YTDLP_PATH ? 'available' : 'missing'
+    ytdlp: YTDLP_PATH ? 'available' : 'missing',
+    cookies: cookieStatus
   });
 });
 
@@ -68,6 +73,7 @@ app.use((req, res) => {
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📡 Health check available at /health`);
+  console.log(`🍪 Cookies: YouTube=${cookieStatus.youtube}, Instagram=${cookieStatus.instagram}, TikTok=${cookieStatus.tiktok}`);
   if (process.env.FRONTEND_URL) {
     console.log(`🌐 CORS enabled for: ${process.env.FRONTEND_URL}`);
   }
