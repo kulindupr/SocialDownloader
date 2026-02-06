@@ -18,9 +18,6 @@ const YouTubePage = () => {
   const [progress, setProgress] = useState(0);
   const [selectedVideos, setSelectedVideos] = useState([]);
 
-  // Always use cookie-free endpoints when API URL contains fly.dev (deployed backend)
-  const isProduction = import.meta.env.VITE_API_URL?.includes('fly.dev') || true; // Force cookie-free for now
-
   const isPlaylistUrl = (urlString) => {
     return urlString.includes('list=') || urlString.includes('/playlist');
   };
@@ -69,29 +66,20 @@ const YouTubePage = () => {
 
     try {
       const isAudio = downloadType === 'audio';
-      const ext = isAudio ? 'mp4' : 'mp4'; // No audio support in no-cookies version
+      const ext = isAudio ? 'mp3' : 'mp4';
       const sanitizedTitle = videoInfo.title
         .replace(/[^\w\s-]/g, '')
         .replace(/\s+/g, '_')
         .substring(0, 100);
       const filename = `${sanitizedTitle}.${ext}`;
 
-      // Use cookie-free version in production
-      if (isProduction) {
-        await downloadYouTubeVideoNoCookies(
-          url,
-          filename,
-          (prog) => setProgress(prog)
-        );
-      } else {
-        await downloadYouTubeVideo(
-          url,
-          selectedFormat?.height || null,
-          isAudio ? 'audio' : 'video',
-          filename,
-          (prog) => setProgress(prog)
-        );
-      }
+      await downloadYouTubeVideo(
+        url,
+        selectedFormat?.height || null,
+        isAudio ? 'audio' : 'video',
+        filename,
+        (prog) => setProgress(prog)
+      );
     } catch (err) {
       setError(err.message);
     } finally {
