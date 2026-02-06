@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link2, Loader2, Download, Music, Video, AlertCircle, CheckCircle, X, Zap, Shield } from 'lucide-react';
-import { fetchTikTokInfo, downloadTikTok } from '../services/api';
+import { fetchTikTokInfo, downloadTikTokVideo } from '../services/api';
 import Footer from '../components/Footer';
 
 const TikTokIcon = ({ className }) => (
@@ -59,9 +59,8 @@ const TikTokPage = () => {
         .substring(0, 50);
       const filename = `${sanitizedTitle}.${ext}`;
 
-      await downloadTikTok(
+      await downloadTikTokVideo(
         url,
-        selectedFormat?.height || null,
         isAudio ? 'audio' : 'video',
         filename,
         (prog) => setProgress(prog)

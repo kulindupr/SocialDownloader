@@ -43,9 +43,13 @@ app.use('/api/youtube', youtubeRoutes);
 app.use('/api/instagram', instagramRoutes);
 app.use('/api/tiktok', tiktokRoutes);
 
-// Health check for Railway
+// Health check for Fly.io / Railway
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    ytdlp: YTDLP_PATH ? 'available' : 'missing'
+  });
 });
 
 // Error handler

@@ -42,9 +42,33 @@ export const getYouTubeInfo = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('YouTube Info Error:', error);
-    res.status(500).json({ 
-      error: error.message || 'Failed to fetch video information' 
+    console.error('YouTube Info Error:', error.message);
+    
+    let errorMessage = 'Failed to fetch video information';
+    let statusCode = 500;
+    
+    const errMsg = error.message?.toLowerCase() || '';
+    
+    if (errMsg.includes('sign in') || errMsg.includes('age') || errMsg.includes('confirm your age')) {
+      errorMessage = 'This video requires age verification or sign-in';
+      statusCode = 403;
+    } else if (errMsg.includes('private') || errMsg.includes('unavailable') || errMsg.includes('not available')) {
+      errorMessage = 'This video is private or unavailable';
+      statusCode = 404;
+    } else if (errMsg.includes('rate') || errMsg.includes('429') || errMsg.includes('too many')) {
+      errorMessage = 'Too many requests. Please try again later.';
+      statusCode = 429;
+    } else if (errMsg.includes('blocked') || errMsg.includes('forbidden') || errMsg.includes('geo')) {
+      errorMessage = 'This video is blocked in your region or the server region';
+      statusCode = 403;
+    } else if (errMsg.includes('spawn') || errMsg.includes('enoent')) {
+      errorMessage = 'Video processing service unavailable';
+      statusCode = 503;
+    }
+    
+    res.status(statusCode).json({ 
+      success: false,
+      error: errorMessage
     });
   }
 };

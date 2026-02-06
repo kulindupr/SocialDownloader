@@ -35,9 +35,33 @@ export const getInstagramInfo = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Instagram Info Error:', error);
-    res.status(500).json({ 
-      error: error.message || 'Failed to fetch Instagram video information' 
+    console.error('Instagram Info Error:', error.message);
+    
+    let errorMessage = 'Failed to fetch Instagram video information';
+    let statusCode = 500;
+    
+    const errMsg = error.message?.toLowerCase() || '';
+    
+    if (errMsg.includes('login') || errMsg.includes('sign in') || errMsg.includes('authentication')) {
+      errorMessage = 'This content requires Instagram login';
+      statusCode = 403;
+    } else if (errMsg.includes('private') || errMsg.includes('unavailable') || errMsg.includes('not found')) {
+      errorMessage = 'This post is private or unavailable';
+      statusCode = 404;
+    } else if (errMsg.includes('rate') || errMsg.includes('429') || errMsg.includes('too many')) {
+      errorMessage = 'Too many requests. Please try again later.';
+      statusCode = 429;
+    } else if (errMsg.includes('blocked') || errMsg.includes('forbidden')) {
+      errorMessage = 'Instagram is blocking this request';
+      statusCode = 403;
+    } else if (errMsg.includes('spawn') || errMsg.includes('enoent')) {
+      errorMessage = 'Video processing service unavailable';
+      statusCode = 503;
+    }
+    
+    res.status(statusCode).json({ 
+      success: false,
+      error: errorMessage
     });
   }
 };

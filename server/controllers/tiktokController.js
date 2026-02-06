@@ -33,9 +33,29 @@ export const getTikTokInfo = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('TikTok Info Error:', error);
-    res.status(500).json({ 
-      error: error.message || 'Failed to fetch TikTok video information' 
+    console.error('TikTok Info Error:', error.message);
+    
+    let errorMessage = 'Failed to fetch TikTok video information';
+    let statusCode = 500;
+    
+    if (error.message?.includes('ENOENT') || error.message?.includes('spawn')) {
+      errorMessage = 'Video processing tool not available';
+      statusCode = 503;
+    } else if (error.message?.includes('rate') || error.message?.includes('429')) {
+      errorMessage = 'Too many requests. Please try again later.';
+      statusCode = 429;
+    } else if (error.message?.includes('blocked') || error.message?.includes('forbidden')) {
+      errorMessage = 'TikTok is blocking this request. Try again later.';
+      statusCode = 403;
+    } else if (error.message?.includes('private') || error.message?.includes('unavailable')) {
+      errorMessage = 'This video is private or unavailable';
+      statusCode = 404;
+    }
+    
+    res.status(statusCode).json({ 
+      success: false,
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };

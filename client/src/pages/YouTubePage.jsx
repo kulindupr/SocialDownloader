@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Youtube, Link2, Loader2, Download, Music, Video, AlertCircle, CheckCircle, X, ListVideo, Package, Check, Square, CheckSquare } from 'lucide-react';
-import { fetchYouTubeInfo, downloadYouTube, fetchYouTubePlaylistInfo, downloadYouTubePlaylist, downloadSelectedPlaylistVideos } from '../services/api';
+import { fetchYouTubeInfo, downloadYouTubeVideo, fetchYouTubePlaylistInfo, downloadYouTubePlaylist, downloadSelectedPlaylistVideos } from '../services/api';
 import Footer from '../components/Footer';
 
 const YouTubePage = () => {
@@ -71,7 +71,7 @@ const YouTubePage = () => {
         .substring(0, 100);
       const filename = `${sanitizedTitle}.${ext}`;
 
-      await downloadYouTube(
+      await downloadYouTubeVideo(
         url,
         selectedFormat?.height || null,
         isAudio ? 'audio' : 'video',

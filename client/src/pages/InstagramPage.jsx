@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Instagram, Link2, Loader2, Download, Music, Video, AlertCircle, CheckCircle, X, Zap, Shield } from 'lucide-react';
-import { fetchInstagramInfo, downloadInstagram } from '../services/api';
+import { fetchInstagramInfo, downloadInstagramVideo } from '../services/api';
 import Footer from '../components/Footer';
 
 const InstagramPage = () => {
@@ -53,9 +53,8 @@ const InstagramPage = () => {
         .substring(0, 50);
       const filename = `${sanitizedTitle}.${ext}`;
 
-      await downloadInstagram(
+      await downloadInstagramVideo(
         url,
-        selectedFormat?.height || null,
         isAudio ? 'audio' : 'video',
         filename,
         (prog) => setProgress(prog)

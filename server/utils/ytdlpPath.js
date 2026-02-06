@@ -3,22 +3,23 @@ import { join } from 'path';
 import { homedir } from 'os';
 import { execSync } from 'child_process';
 
-// Get yt-dlp executable path (handles both PATH and WinGet installation)
+// Get yt-dlp executable path (handles Windows, Linux, and Docker)
 const getYtDlpPath = () => {
+  const isWindows = process.platform === 'win32';
   const localAppData = process.env.LOCALAPPDATA || join(homedir(), 'AppData', 'Local');
   
-  // Check common installation paths first (more reliable than PATH on Windows)
+  // Check common installation paths
   const possiblePaths = [
-    // WinGet Packages folder (most common for WinGet installs)
+    // Linux/Docker paths (check first for server deployments)
+    '/usr/local/bin/yt-dlp',
+    '/usr/bin/yt-dlp',
+    '/root/.local/bin/yt-dlp',
+    // Windows paths
     join(localAppData, 'Microsoft', 'WinGet', 'Packages', 'yt-dlp.yt-dlp_Microsoft.Winget.Source_8wekyb3d8bbwe', 'yt-dlp.exe'),
-    // WinGet Links folder
     join(localAppData, 'Microsoft', 'WinGet', 'Links', 'yt-dlp.exe'),
-    // Other common paths
     join(homedir(), 'AppData', 'Local', 'Programs', 'yt-dlp', 'yt-dlp.exe'),
     'C:\\Program Files\\yt-dlp\\yt-dlp.exe',
     'C:\\yt-dlp\\yt-dlp.exe',
-    '/usr/local/bin/yt-dlp', // Linux/Mac
-    '/usr/bin/yt-dlp',
   ];
 
   for (const p of possiblePaths) {
