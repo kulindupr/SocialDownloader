@@ -17,8 +17,8 @@ const InstagramPage = () => {
   const [downloading, setDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  // Check if we're in production (deployed)
-  const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+  // Always use cookie-free endpoints when API URL contains fly.dev (deployed backend)
+  const isProduction = import.meta.env.VITE_API_URL?.includes('fly.dev') || true; // Force cookie-free for now
 
   const handleSubmit = async (e) => {
     e.preventDefault();

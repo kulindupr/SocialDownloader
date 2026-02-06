@@ -5,6 +5,7 @@ import {
   fetchYouTubeInfo, downloadYouTubeVideo, fetchYouTubePlaylistInfo, downloadYouTubePlaylist, downloadSelectedPlaylistVideos,
   fetchYouTubeInfoNoCookies, downloadYouTubeVideoNoCookies
 } from '../services/api';
+import { logEndpointCall } from '../utils/debug';
 import Footer from '../components/Footer';
 
 const YouTubePage = () => {
@@ -19,8 +20,8 @@ const YouTubePage = () => {
   const [progress, setProgress] = useState(0);
   const [selectedVideos, setSelectedVideos] = useState([]);
 
-  // Check if we're in production (deployed)
-  const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+  // Always use cookie-free endpoints when API URL contains fly.dev (deployed backend)
+  const isProduction = import.meta.env.VITE_API_URL?.includes('fly.dev') || true; // Force cookie-free for now
 
   const isPlaylistUrl = (urlString) => {
     return urlString.includes('list=') || urlString.includes('/playlist');
@@ -49,6 +50,7 @@ const YouTubePage = () => {
       } else {
         // Use cookie-free version in production to avoid 403 errors
         const fetchFunction = isProduction ? fetchYouTubeInfoNoCookies : fetchYouTubeInfo;
+        logEndpointCall('/youtube/info', isProduction);
         const response = await fetchFunction(url);
         if (response.success) {
           setVideoInfo(response.data);
