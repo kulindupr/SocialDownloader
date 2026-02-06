@@ -7,6 +7,11 @@ import instagramRoutes from './routes/instagram.js';
 import tiktokRoutes from './routes/tiktok.js';
 import { YTDLP_PATH } from './utils/ytdlpPath.js';
 import { initializeCookies } from './utils/cookies.js';
+import { 
+  getYouTubeInfoNoCookies, downloadYouTubeNoCookies,
+  getInstagramInfoNoCookies, downloadInstagramNoCookies,
+  getTikTokInfoNoCookies, downloadTikTokNoCookies
+} from './controllers/noCookiesController.js';
 
 dotenv.config();
 
@@ -47,6 +52,14 @@ app.use('/api/video', videoRoutes);
 app.use('/api/youtube', youtubeRoutes);
 app.use('/api/instagram', instagramRoutes);
 app.use('/api/tiktok', tiktokRoutes);
+
+// Cookie-free alternatives (primary routes for deployment)
+app.post('/api/youtube/info-nocookies', getYouTubeInfoNoCookies);
+app.post('/api/youtube/download-nocookies', downloadYouTubeNoCookies);
+app.post('/api/instagram/info-nocookies', getInstagramInfoNoCookies);
+app.post('/api/instagram/download-nocookies', downloadInstagramNoCookies);
+app.post('/api/tiktok/info-nocookies', getTikTokInfoNoCookies);
+app.post('/api/tiktok/download-nocookies', downloadTikTokNoCookies);
 
 // Health check for Fly.io / Railway
 app.get('/health', (req, res) => {

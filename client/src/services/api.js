@@ -76,6 +76,37 @@ export const fetchYouTubeInfo = async (url) => {
   return response.data;
 };
 
+// Cookie-free YouTube functions (for deployment)
+export const fetchYouTubeInfoNoCookies = async (url) => {
+  const response = await api.post('/youtube/info-nocookies', { url });
+  return response.data;
+};
+
+export const downloadYouTubeVideoNoCookies = async (url, filename, onProgress) => {
+  const response = await api.post('/youtube/download-nocookies',
+    { url, filename },
+    {
+      responseType: 'blob',
+      onDownloadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent);
+        }
+      },
+    }
+  );
+
+  const blob = new Blob([response.data], { type: 'video/mp4' });
+  const downloadUrl = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.download = filename || 'youtube-video.mp4';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(downloadUrl);
+};
+
 export const fetchYouTubePlaylistInfo = async (url) => {
   const response = await api.post('/youtube/playlist/info', { url });
   return response.data;
@@ -166,6 +197,37 @@ export const fetchInstagramInfo = async (url) => {
   return response.data;
 };
 
+// Cookie-free Instagram functions (for deployment)
+export const fetchInstagramInfoNoCookies = async (url) => {
+  const response = await api.post('/instagram/info-nocookies', { url });
+  return response.data;
+};
+
+export const downloadInstagramVideoNoCookies = async (url, filename, onProgress) => {
+  const response = await api.post('/instagram/download-nocookies',
+    { url, filename },
+    {
+      responseType: 'blob',
+      onDownloadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent);
+        }
+      },
+    }
+  );
+
+  const blob = new Blob([response.data], { type: 'video/mp4' });
+  const downloadUrl = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.download = filename || 'instagram-video.mp4';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(downloadUrl);
+};
+
 export const downloadInstagramVideo = async (url, type, filename, onProgress) => {
   const response = await api.post('/instagram/download',
     { url, type, filename },
@@ -197,6 +259,37 @@ export const downloadInstagramVideo = async (url, type, filename, onProgress) =>
 export const fetchTikTokInfo = async (url) => {
   const response = await api.post('/tiktok/info', { url });
   return response.data;
+};
+
+// Cookie-free TikTok functions (for deployment)
+export const fetchTikTokInfoNoCookies = async (url) => {
+  const response = await api.post('/tiktok/info-nocookies', { url });
+  return response.data;
+};
+
+export const downloadTikTokVideoNoCookies = async (url, filename, onProgress) => {
+  const response = await api.post('/tiktok/download-nocookies',
+    { url, filename },
+    {
+      responseType: 'blob',
+      onDownloadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(percent);
+        }
+      },
+    }
+  );
+
+  const blob = new Blob([response.data], { type: 'video/mp4' });
+  const downloadUrl = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.download = filename || 'tiktok-video.mp4';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(downloadUrl);
 };
 
 export const downloadTikTokVideo = async (url, type, filename, onProgress) => {

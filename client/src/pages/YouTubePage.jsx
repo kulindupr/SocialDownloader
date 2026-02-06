@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Youtube, Link2, Loader2, Download, Music, Video, AlertCircle, CheckCircle, X, ListVideo, Package, Check, Square, CheckSquare } from 'lucide-react';
-import { fetchYouTubeInfo, downloadYouTubeVideo, fetchYouTubePlaylistInfo, downloadYouTubePlaylist, downloadSelectedPlaylistVideos } from '../services/api';
+import { 
+  fetchYouTubeInfo, downloadYouTubeVideo, fetchYouTubePlaylistInfo, downloadYouTubePlaylist, downloadSelectedPlaylistVideos,
+  fetchYouTubeInfoNoCookies, downloadYouTubeVideoNoCookies
+} from '../services/api';
 import Footer from '../components/Footer';
 
 const YouTubePage = () => {
@@ -15,6 +18,9 @@ const YouTubePage = () => {
   const [downloading, setDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [selectedVideos, setSelectedVideos] = useState([]);
+
+  // Check if we're in production (deployed)
+  const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
 
   const isPlaylistUrl = (urlString) => {
     return urlString.includes('list=') || urlString.includes('/playlist');
@@ -41,7 +47,9 @@ const YouTubePage = () => {
           }
         }
       } else {
-        const response = await fetchYouTubeInfo(url);
+        // Use cookie-free version in production to avoid 403 errors
+        const fetchFunction = isProduction ? fetchYouTubeInfoNoCookies : fetchYouTubeInfo;
+        const response = await fetchFunction(url);
         if (response.success) {
           setVideoInfo(response.data);
           if (response.data.videoFormats?.length > 0) {
@@ -64,20 +72,29 @@ const YouTubePage = () => {
 
     try {
       const isAudio = downloadType === 'audio';
-      const ext = isAudio ? 'mp3' : 'mp4';
+      const ext = isAudio ? 'mp4' : 'mp4'; // No audio support in no-cookies version
       const sanitizedTitle = videoInfo.title
         .replace(/[^\w\s-]/g, '')
         .replace(/\s+/g, '_')
         .substring(0, 100);
       const filename = `${sanitizedTitle}.${ext}`;
 
-      await downloadYouTubeVideo(
-        url,
-        selectedFormat?.height || null,
-        isAudio ? 'audio' : 'video',
-        filename,
-        (prog) => setProgress(prog)
-      );
+      // Use cookie-free version in production
+      if (isProduction) {
+        await downloadYouTubeVideoNoCookies(
+          url,
+          filename,
+          (prog) => setProgress(prog)
+        );
+      } else {
+        await downloadYouTubeVideo(
+          url,
+          selectedFormat?.height || null,
+          isAudio ? 'audio' : 'video',
+          filename,
+          (prog) => setProgress(prog)
+        );
+      }
     } catch (err) {
       setError(err.message);
     } finally {

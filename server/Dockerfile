@@ -1,10 +1,12 @@
 # Use Node 18 (same as local)
 FROM node:18-bullseye
 
-# Install FFmpeg and yt-dlp (needed for video processing)
+# Install FFmpeg and yt-dlp with Python 3.10+ (needed for video processing)
 RUN apt-get update && \
-    apt-get install -y ffmpeg python3 python3-pip curl build-essential && \
-    pip3 install --upgrade yt-dlp && \
+    apt-get install -y ffmpeg python3.9 python3.9-pip python3.9-dev curl build-essential software-properties-common && \
+    curl -sS https://bootstrap.pypa.io/get-pip.py | python3.9 && \
+    python3.9 -m pip install --upgrade yt-dlp && \
+    ln -sf /usr/bin/python3.9 /usr/bin/python3 && \
     rm -rf /var/lib/apt/lists/*
 
 # Set working folder inside the container

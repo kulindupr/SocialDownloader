@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link2, Loader2, Download, Music, Video, AlertCircle, CheckCircle, X, Zap, Shield } from 'lucide-react';
-import { fetchTikTokInfo, downloadTikTokVideo } from '../services/api';
+import { 
+  fetchTikTokInfo, downloadTikTokVideo,
+  fetchTikTokInfoNoCookies, downloadTikTokVideoNoCookies
+} from '../services/api';
 import Footer from '../components/Footer';
 
 const TikTokIcon = ({ className }) => (
@@ -20,6 +23,9 @@ const TikTokPage = () => {
   const [downloading, setDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
 
+  // Check if we're in production (deployed)
+  const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!url.trim()) return;
@@ -30,7 +36,9 @@ const TikTokPage = () => {
     setSelectedFormat(null);
 
     try {
-      const response = await fetchTikTokInfo(url);
+      // Use cookie-free version in production to avoid 403 errors
+      const fetchFunction = isProduction ? fetchTikTokInfoNoCookies : fetchTikTokInfo;
+      const response = await fetchFunction(url);
       if (response.success) {
         setVideoInfo(response.data);
         if (response.data.formats?.length > 0) {
@@ -52,19 +60,28 @@ const TikTokPage = () => {
 
     try {
       const isAudio = downloadType === 'audio';
-      const ext = isAudio ? 'mp3' : 'mp4';
+      const ext = isAudio ? 'mp4' : 'mp4'; // No audio support in no-cookies version
       const sanitizedTitle = (videoInfo.title || 'tiktok-video')
         .replace(/[^\w\s-]/g, '')
         .replace(/\s+/g, '_')
         .substring(0, 50);
       const filename = `${sanitizedTitle}.${ext}`;
 
-      await downloadTikTokVideo(
-        url,
-        isAudio ? 'audio' : 'video',
-        filename,
-        (prog) => setProgress(prog)
-      );
+      // Use cookie-free version in production
+      if (isProduction) {
+        await downloadTikTokVideoNoCookies(
+          url,
+          filename,
+          (prog) => setProgress(prog)
+        );
+      } else {
+        await downloadTikTokVideo(
+          url,
+          isAudio ? 'audio' : 'video',
+          filename,
+          (prog) => setProgress(prog)
+        );
+      }
     } catch (err) {
       setError(err.message);
     } finally {
