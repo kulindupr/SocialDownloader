@@ -2,17 +2,27 @@
 
 A modern, feature-rich social media video downloader supporting **YouTube**, **Facebook**, **Instagram**, and **TikTok**. Built with React and Node.js, featuring a beautiful iOS-style glassmorphism UI.
 
-![SocialDownloader](https://img.shields.io/badge/Version-1.0.0-blue)
+![SocialDownloader](https://img.shields.io/badge/Version-2.0.0-blue)
 ![Node.js](https://img.shields.io/badge/Node.js-18+-green)
 ![React](https://img.shields.io/badge/React-18-61DAFB)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
+![Deployed](https://img.shields.io/badge/Status-Live-brightgreen)
+
+---
+
+## 🌐 Live Demo
+
+**🚀 Try it now:**
+- **Frontend:** [https://social-downloader-delta.vercel.app](https://social-downloader-delta.vercel.app)
+- **Backend API:** [https://server-twilight-flower-1963.fly.dev](https://server-twilight-flower-1963.fly.dev)
+- **Health Check:** [https://server-twilight-flower-1963.fly.dev/health](https://server-twilight-flower-1963.fly.dev/health)
 
 ---
 
 ## ✨ Features
 
 ### 🎯 Multi-Platform Support
-- **YouTube** - Videos, Shorts, and full Playlist support
+- **YouTube** - Videos, Shorts, and full Playlist support with selective download
 - **Facebook** - Public videos, Reels, and audio extraction (MP3)
 - **Instagram** - Posts, Reels, and IGTV
 - **TikTok** - Videos with or without watermark
@@ -31,10 +41,49 @@ A modern, feature-rich social media video downloader supporting **YouTube**, **F
 - **Selective Playlist** - Choose specific videos from playlists
 - **Direct Streaming** - Videos stream directly to your browser
 
-### 🛡️ Robust Error Handling
-- Graceful error messages
-- Auto-retry on failed downloads
-- Filters out deleted/private videos from playlists
+### 🛡️ Robust Architecture
+- **Cookie-free extraction** - No personal credentials needed
+- **Multiple fallback strategies** - Android, iOS, TV, and Web user agents
+- **Auto-retry on failures** - Automatically tries different extraction methods
+- **CORS configured** - Secure cross-origin requests
+
+---
+
+## 🏗️ Deployment Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        User's Browser                            │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                     Vercel (Frontend)                            │
+│              social-downloader-delta.vercel.app                  │
+│                                                                  │
+│  • React 18 + Vite                                               │
+│  • Tailwind CSS + Framer Motion                                  │
+│  • Static file hosting                                           │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼ API Calls
+┌─────────────────────────────────────────────────────────────────┐
+│                      Fly.io (Backend)                            │
+│            server-twilight-flower-1963.fly.dev                   │
+│                                                                  │
+│  • Node.js 18 + Express                                          │
+│  • yt-dlp (video extraction)                                     │
+│  • FFmpeg (video/audio processing)                               │
+│  • Cookie-free extraction strategies                             │
+│  • Region: Singapore (sin)                                       │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   Social Media Platforms                         │
+│         YouTube │ Facebook │ Instagram │ TikTok                  │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -44,9 +93,9 @@ A modern, feature-rich social media video downloader supporting **YouTube**, **F
 | Technology | Purpose |
 |------------|---------|
 | **React 18** | UI Framework |
-| **Vite** | Build Tool & Dev Server |
-| **Tailwind CSS** | Utility-first Styling |
-| **Framer Motion** | Animations & Transitions |
+| **Vite 5** | Build Tool & Dev Server |
+| **Tailwind CSS 3** | Utility-first Styling |
+| **Framer Motion 11** | Animations & Transitions |
 | **React Router DOM** | Client-side Routing |
 | **Axios** | HTTP Client |
 | **Lucide React** | Beautiful Icons |
@@ -54,13 +103,19 @@ A modern, feature-rich social media video downloader supporting **YouTube**, **F
 ### Backend
 | Technology | Purpose |
 |------------|---------|
-| **Node.js** | Runtime Environment |
-| **Express.js** | Web Framework |
+| **Node.js 18** | Runtime Environment |
+| **Express.js 4** | Web Framework |
 | **yt-dlp** | Video Extraction Engine |
 | **Archiver** | ZIP File Creation |
 | **CORS** | Cross-Origin Resource Sharing |
 | **dotenv** | Environment Variables |
-| **express-validator** | Input Validation |
+
+### Deployment
+| Service | Purpose |
+|---------|---------|
+| **Vercel** | Frontend hosting (CDN, auto-deploy) |
+| **Fly.io** | Backend hosting (Docker, global regions) |
+| **Docker** | Backend containerization |
 
 ### External Dependencies
 | Tool | Purpose |
@@ -70,90 +125,80 @@ A modern, feature-rich social media video downloader supporting **YouTube**, **F
 
 ---
 
-## 📋 Prerequisites
+## 📋 API Endpoints
 
-Before running this project, ensure you have:
-
-### 1. Node.js (v18 or higher)
-Download from [nodejs.org](https://nodejs.org/)
-
-```bash
-node --version  # Should be v18+
+### Health Check
+```
+GET /health
+```
+Response:
+```json
+{
+  "status": "ok",
+  "timestamp": "2026-02-06T04:30:00.000Z",
+  "ytdlp": "available",
+  "cookies": { "youtube": false, "instagram": false, "tiktok": false }
+}
 ```
 
-### 2. yt-dlp (Required)
+### YouTube
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/youtube/info` | POST | Get video info |
+| `/api/youtube/download` | POST | Download video/audio |
+| `/api/youtube/playlist/info` | POST | Get playlist info |
+| `/api/youtube/playlist/download` | POST | Download full playlist |
+| `/api/youtube/playlist/download-selected` | POST | Download selected videos |
 
-**Windows (using WinGet):**
-```powershell
-winget install yt-dlp
-```
+### Facebook
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/video/info` | POST | Get video info |
+| `/api/video/download` | POST | Download video |
+| `/api/video/download-audio` | POST | Extract audio (MP3) |
 
-**Windows (using Chocolatey):**
-```powershell
-choco install yt-dlp
-```
+### Instagram
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/instagram/info` | POST | Get video info |
+| `/api/instagram/download` | POST | Download video |
 
-**macOS (using Homebrew):**
-```bash
-brew install yt-dlp
-```
-
-**Linux (Debian/Ubuntu):**
-```bash
-sudo apt install yt-dlp
-# or using pip
-pip install yt-dlp
-```
-
-### 3. FFmpeg (Required for video merging)
-
-**Windows:**
-```powershell
-winget install ffmpeg
-```
-
-**macOS:**
-```bash
-brew install ffmpeg
-```
-
-**Linux:**
-```bash
-sudo apt install ffmpeg
-```
-
-### 4. Verify Installation
-```bash
-yt-dlp --version
-ffmpeg -version
-```
+### TikTok
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/tiktok/info` | POST | Get video info |
+| `/api/tiktok/download` | POST | Download video |
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Local Development
 
-### 1. Clone the Repository
+### Prerequisites
 
+- **Node.js** v18 or higher
+- **yt-dlp** (video extraction tool)
+- **FFmpeg** (video processing)
+
+### Installation
+
+**1. Clone the repository:**
 ```bash
 git clone https://github.com/yourusername/SocialDownloader.git
 cd SocialDownloader
 ```
 
-### 2. Install Backend Dependencies
-
+**2. Install dependencies:**
 ```bash
+# Backend
 cd server
 npm install
-```
 
-### 3. Install Frontend Dependencies
-
-```bash
+# Frontend
 cd ../client
 npm install
 ```
 
-### 4. Configure Environment Variables
+**3. Configure environment variables:**
 
 **Backend (`server/.env`):**
 ```env
@@ -166,22 +211,120 @@ NODE_ENV=development
 VITE_API_URL=http://localhost:5000/api
 ```
 
-### 5. Run the Application
-
-**Terminal 1 - Start Backend Server:**
+**4. Start the application:**
 ```bash
+# Terminal 1 - Backend
 cd server
 npm run dev
-```
 
-**Terminal 2 - Start Frontend Dev Server:**
-```bash
+# Terminal 2 - Frontend
 cd client
 npm run dev
 ```
 
-### 6. Open in Browser
-Navigate to `http://localhost:3000`
+**5. Open in browser:** http://localhost:5173
+
+---
+
+## ☁️ Deployment Guide
+
+### Frontend (Vercel)
+
+**1. Push to GitHub**
+
+**2. Connect to Vercel:**
+- Go to [vercel.com](https://vercel.com)
+- Import your repository
+- Set framework preset: **Vite**
+- Set root directory: **client**
+
+**3. Environment Variables:**
+| Variable | Value |
+|----------|-------|
+| `VITE_API_URL` | `https://server-twilight-flower-1963.fly.dev/api` |
+
+**4. Deploy!**
+
+---
+
+### Backend (Fly.io)
+
+**1. Install Fly CLI:**
+```bash
+# Windows
+powershell -Command "iwr https://fly.io/install.ps1 -useb | iex"
+
+# macOS/Linux
+curl -L https://fly.io/install.sh | sh
+```
+
+**2. Login to Fly.io:**
+```bash
+flyctl auth login
+```
+
+**3. Deploy:**
+```bash
+cd server
+flyctl deploy
+```
+
+**4. Configuration (`fly.toml`):**
+```toml
+app = 'server-twilight-flower-1963'
+primary_region = 'sin'
+
+[env]
+  NODE_ENV = "production"
+  FRONTEND_URL = "https://social-downloader-delta.vercel.app"
+
+[http_service]
+  internal_port = 5000
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  memory = '1gb'
+  cpus = 1
+```
+
+**5. Dockerfile:**
+```dockerfile
+FROM node:18-bullseye
+
+RUN apt-get update && \
+    apt-get install -y ffmpeg python3 python3-pip curl build-essential && \
+    python3 -m pip install --upgrade pip setuptools wheel && \
+    python3 -m pip install --upgrade yt-dlp && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --production
+COPY . .
+
+EXPOSE 5000
+CMD ["npm", "start"]
+```
+
+---
+
+## 🔧 Cookie-Free Extraction
+
+The backend uses **cookie-free extraction strategies** to bypass platform restrictions without requiring personal credentials:
+
+### Strategies Used:
+1. **Mobile App User Agents** - Android/iOS app signatures
+2. **TV Embed** - Smart TV embedded player
+3. **Web Bypass** - Desktop browser with custom headers
+
+### Why Cookie-Free?
+- ✅ **Privacy** - No personal login sessions shared
+- ✅ **Security** - No credential storage
+- ✅ **Reliability** - Multiple fallback methods
+- ✅ **Deployment-friendly** - Works on cloud servers
 
 ---
 
@@ -189,44 +332,51 @@ Navigate to `http://localhost:3000`
 
 ```
 SocialDownloader/
-├── client/                    # React Frontend
+├── client/                           # React Frontend
 │   ├── src/
-│   │   ├── components/        # Reusable UI Components
-│   │   │   ├── Navbar.jsx     # Navigation with platform links
-│   │   │   └── Footer.jsx     # Professional footer
-│   │   ├── pages/             # Page Components
-│   │   │   ├── HomePage.jsx   # Landing page
-│   │   │   ├── YouTubePage.jsx    # YouTube downloader
-│   │   │   ├── FacebookPage.jsx   # Facebook downloader
-│   │   │   ├── InstagramPage.jsx  # Instagram downloader
-│   │   │   └── TikTokPage.jsx     # TikTok downloader
+│   │   ├── components/               # Reusable UI Components
+│   │   │   ├── Navbar.jsx
+│   │   │   ├── Footer.jsx
+│   │   │   ├── VideoPreview.jsx
+│   │   │   └── DownloadButton.jsx
+│   │   ├── pages/                    # Page Components
+│   │   │   ├── Home.jsx
+│   │   │   ├── YouTubePage.jsx
+│   │   │   ├── FacebookPage.jsx
+│   │   │   ├── InstagramPage.jsx
+│   │   │   └── TikTokPage.jsx
 │   │   ├── services/
-│   │   │   └── api.js         # API client functions
-│   │   ├── App.jsx            # Main app with routing
-│   │   └── index.css          # Global styles + Tailwind
-│   ├── package.json
-│   ├── tailwind.config.js
-│   └── vite.config.js
+│   │   │   └── api.js                # API client
+│   │   └── App.jsx
+│   ├── .env                          # Environment variables
+│   ├── vercel.json                   # Vercel config
+│   └── package.json
 │
-├── server/                    # Node.js Backend
-│   ├── controllers/           # Request handlers
+├── server/                           # Node.js Backend
+│   ├── controllers/
 │   │   ├── youtubeController.js
 │   │   ├── facebookController.js
 │   │   ├── instagramController.js
-│   │   └── tiktokController.js
-│   ├── routes/                # API routes
+│   │   ├── tiktokController.js
+│   │   └── noCookiesController.js    # Cookie-free handlers
+│   ├── routes/
 │   │   ├── youtube.js
-│   │   ├── video.js           # Facebook routes
+│   │   ├── video.js                  # Facebook routes
 │   │   ├── instagram.js
 │   │   └── tiktok.js
-│   ├── utils/                 # Utility modules
-│   │   ├── ytdlpPath.js       # yt-dlp executable finder
-│   │   ├── ytdlpYoutube.js    # YouTube extraction
-│   │   ├── ytdlpInstagram.js  # Instagram extraction
-│   │   ├── ytdlpTiktok.js     # TikTok extraction
-│   │   ├── ytdlp.js           # Facebook extraction
-│   │   └── downloader.js      # Stream utilities
-│   ├── index.js               # Server entry point
+│   ├── utils/
+│   │   ├── ytdlpYoutube.js
+│   │   ├── ytdlpYoutubeNoCookies.js  # Cookie-free YouTube
+│   │   ├── ytdlpInstagram.js
+│   │   ├── ytdlpInstagramNoCookies.js
+│   │   ├── ytdlpTiktok.js
+│   │   ├── ytdlpTiktokNoCookies.js
+│   │   ├── ytdlpPath.js
+│   │   └── cookies.js                # Cookie management
+│   ├── downloads/                    # Temporary downloads
+│   ├── Dockerfile                    # Docker configuration
+│   ├── fly.toml                      # Fly.io configuration
+│   ├── .env                          # Environment variables
 │   └── package.json
 │
 └── README.md
@@ -234,273 +384,86 @@ SocialDownloader/
 
 ---
 
-## 🔌 API Endpoints
+## 🔒 CORS Configuration
 
-### YouTube
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/youtube/info` | Get video information |
-| POST | `/api/youtube/download` | Download video/audio |
-| POST | `/api/youtube/playlist/info` | Get playlist information |
-| POST | `/api/youtube/playlist/download` | Download full playlist as ZIP |
-| POST | `/api/youtube/playlist/download-selected` | Download selected videos as ZIP |
-
-### Facebook
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/video/info` | Get video information |
-| POST | `/api/video/download` | Download video (MP4) |
-| POST | `/api/video/download-audio` | Download audio (MP3) |
-
-### Instagram
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/instagram/info` | Get video information |
-| POST | `/api/instagram/download` | Download video/audio |
-
-### TikTok
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/tiktok/info` | Get video information |
-| POST | `/api/tiktok/download` | Download video/audio |
-
----
-
-## 🎨 UI Components
-
-### Navbar
-- Perfectly centered navigation using absolute positioning
-- Platform-specific icons (YouTube, Facebook, Instagram, TikTok)
-- Dark/Light mode toggle with smooth animation
-- Mobile-responsive hamburger menu
-- Glassmorphism styling with backdrop blur
-
-### Footer
-- Professional design with gradient separator
-- Legal disclaimer section
-- Feature badges (Safe & Secure, Multi-Platform, Free Forever)
-- Copyright notice
-
-### Video Cards
-- Thumbnail preview with fallback
-- Format/quality selection buttons
-- Progress bar for downloads
-- Playlist video selection with checkboxes
-
----
-
-## ⚙️ Configuration
-
-### yt-dlp Path Detection
-
-The application automatically detects yt-dlp in these locations:
-1. WinGet Packages folder (Windows)
-2. System PATH
-3. Common installation directories
-
-If yt-dlp is not found, install it using the commands in Prerequisites.
-
-### Supported URL Formats
-
-**YouTube:**
-- `https://www.youtube.com/watch?v=VIDEO_ID`
-- `https://youtu.be/VIDEO_ID`
-- `https://www.youtube.com/shorts/VIDEO_ID`
-- `https://www.youtube.com/playlist?list=PLAYLIST_ID`
-
-**Facebook:**
-- `https://www.facebook.com/watch?v=VIDEO_ID`
-- `https://fb.watch/VIDEO_ID`
-- `https://www.facebook.com/reel/VIDEO_ID`
-
-**Instagram:**
-- `https://www.instagram.com/p/POST_ID`
-- `https://www.instagram.com/reel/REEL_ID`
-- `https://www.instagram.com/tv/IGTV_ID`
-
-**TikTok:**
-- `https://www.tiktok.com/@username/video/VIDEO_ID`
-- `https://vm.tiktok.com/VIDEO_ID`
-
----
-
-## 🚀 Deployment
-
-### Step 1: Deploy Backend to Railway
-
-1. **Create a Railway Account**
-   - Go to [railway.app](https://railway.app) and sign up
-
-2. **Install Railway CLI** (optional but recommended)
-   ```powershell
-   npm install -g @railway/cli
-   railway login
-   ```
-
-3. **Deploy via GitHub** (Recommended)
-   - Push your code to GitHub
-   - In Railway Dashboard, click "New Project" → "Deploy from GitHub repo"
-   - Select your repository and choose the `server` folder as root directory
-
-4. **Or Deploy via CLI**
-   ```powershell
-   cd server
-   railway init
-   railway up
-   ```
-
-5. **Set Environment Variables in Railway Dashboard**
-   ```
-   PORT=5000
-   NODE_ENV=production
-   FRONTEND_URL=https://your-app-name.vercel.app
-   ```
-
-6. **Copy your Railway URL** (e.g., `https://socialdownloader-production.up.railway.app`)
-
----
-
-### Step 2: Deploy Frontend to Vercel
-
-1. **Create a Vercel Account**
-   - Go to [vercel.com](https://vercel.com) and sign up
-
-2. **Install Vercel CLI** (optional)
-   ```powershell
-   npm install -g vercel
-   vercel login
-   ```
-
-3. **Deploy via GitHub** (Recommended)
-   - In Vercel Dashboard, click "Add New" → "Project"
-   - Import your GitHub repository
-   - Set the **Root Directory** to `client`
-   - Add Environment Variable:
-     ```
-     VITE_API_URL=https://your-railway-backend-url.railway.app/api
-     ```
-   - Click Deploy
-
-4. **Or Deploy via CLI**
-   ```powershell
-   cd client
-   vercel --prod
-   ```
-   When prompted, set:
-   - Root Directory: `./` (you're already in client)
-   - Build Command: `npm run build`
-   - Output Directory: `dist`
-
----
-
-### Step 3: Update Backend CORS
-
-After deploying frontend, update Railway environment variable:
-```
-FRONTEND_URL=https://your-app-name.vercel.app
-```
-
----
-
-### Deployment Checklist
-
-| Step | Platform | Action |
-|------|----------|--------|
-| 1 | Railway | Deploy server folder |
-| 2 | Railway | Set `FRONTEND_URL` env variable |
-| 3 | Vercel | Deploy client folder |
-| 4 | Vercel | Set `VITE_API_URL` env variable |
-| 5 | Railway | Update `FRONTEND_URL` with actual Vercel URL |
-
-### Important Notes
-
-⚠️ **Railway automatically installs yt-dlp and FFmpeg** via the `nixpacks.toml` configuration.
-
-⚠️ **Environment Variables**: Make sure to set them in the deployment platform dashboards, not just in local `.env` files.
-
-⚠️ **Free Tier Limits**:
-- Railway: 500 hours/month (sleeps after inactivity)
-- Vercel: Unlimited for static sites
-
----
-
-### Frontend (Vercel/Netlify)
-
-```bash
-cd client
-npm run build
-# Deploy the 'dist' folder
-```
-
-### Backend (Railway/Render/DigitalOcean)
-
-⚠️ **Important:** The backend requires yt-dlp and FFmpeg binaries, so it cannot run on serverless platforms like Vercel Functions.
-
-**Recommended:** Deploy on a VPS or container-based platform:
-- Railway
-- Render
-- DigitalOcean App Platform
-- Heroku (with buildpacks)
-- Self-hosted VPS
+The backend is configured to accept requests from:
+- `https://social-downloader-delta.vercel.app` (Production)
+- `http://localhost:5173` (Development)
+- `http://localhost:3000` (Alternative dev)
 
 ---
 
 ## 🐛 Troubleshooting
 
-### yt-dlp not found (ENOENT error)
-```bash
-# Reinstall yt-dlp
-winget install yt-dlp  # Windows
-brew install yt-dlp    # macOS
+### Common Issues
 
-# Restart terminal/server after installation
+**1. 403 Forbidden Error (YouTube)**
+- The backend automatically uses cookie-free extraction
+- If still failing, the video may be geo-restricted or private
+
+**2. CORS Errors**
+- Ensure `FRONTEND_URL` is set correctly in Fly.io
+- Check that preflight OPTIONS requests are allowed
+
+**3. Download Timeout**
+- Large files may take longer to process
+- Fly.io has request timeouts; consider streaming approach
+
+**4. yt-dlp Not Found (Local)**
+- Ensure yt-dlp is installed and in PATH
+- Run: `yt-dlp --version` to verify
+
+### Check Backend Health
+```bash
+curl https://server-twilight-flower-1963.fly.dev/health
 ```
 
-### Video downloads with audio only
-This happens when video+audio streams need merging. Ensure FFmpeg is installed:
+### View Fly.io Logs
 ```bash
-ffmpeg -version
+flyctl logs --app server-twilight-flower-1963
 ```
-
-### 403 Forbidden errors
-Some videos are age-restricted or geo-blocked. Update yt-dlp to the latest version:
-```bash
-yt-dlp -U
-```
-
-### Playlist shows deleted/private videos
-The app automatically filters out unavailable videos. If you still see them, try fetching the playlist again.
 
 ---
 
-## 📄 License
+## 📈 Performance Tips
 
-This project is licensed under the MIT License.
-
----
-
-## ⚠️ Disclaimer
-
-This tool is intended for **personal use only**. Users are responsible for ensuring their downloads comply with applicable laws and the terms of service of the respective platforms. We do not host, store, or distribute any copyrighted content.
+1. **Use streaming downloads** - Videos stream directly to browser
+2. **Limit playlist size** - Large playlists take more time
+3. **Choose lower quality** - Faster downloads, less bandwidth
+4. **Enable auto-stop** - Fly.io machines stop when idle (saves cost)
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+2. Create your feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
 
 ---
 
-## 📞 Support
+## 📄 License
 
-If you encounter any issues or have questions, please open an issue on GitHub.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-Made with ❤️ by SocialDownloader Team
+## ⚠️ Disclaimer
+
+This tool is for **educational purposes only**. Users are responsible for complying with the Terms of Service of respective platforms. Do not download copyrighted content without permission.
+
+---
+
+## 🙏 Acknowledgments
+
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) - Amazing video extraction library
+- [FFmpeg](https://ffmpeg.org/) - Video/audio processing
+- [Vercel](https://vercel.com) - Frontend hosting
+- [Fly.io](https://fly.io) - Backend hosting
+- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS
+
+---
+
+**Made with ❤️ by Kulindu**
