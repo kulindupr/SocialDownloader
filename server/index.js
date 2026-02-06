@@ -14,25 +14,35 @@ const app = express();
 // Use Railway's assigned PORT or fallback for local dev
 const PORT = parseInt(process.env.PORT, 10) || 5000;
 
-// CORS: allowed origins
+// CORS: allowed origins - include Vercel deployment
 const allowedOrigins = [
   process.env.FRONTEND_URL,
+  'https://social-downloader-delta.vercel.app',
+  'https://socialdownloader.vercel.app',
   'http://localhost:5173',
   'http://localhost:3000',
   'http://127.0.0.1:3000'
 ].filter(Boolean);
 
+// Remove duplicates
+const uniqueOrigins = [...new Set(allowedOrigins)];
+
 app.use(cors({
   origin: (origin, callback) => {
+    // Allow requests with no origin (health checks, mobile apps, curl)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
+    
+    // Check if origin is in allowed list or matches vercel pattern
+    if (uniqueOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
       return callback(null, true);
     }
+    
     console.warn(`CORS blocked: ${origin}`);
     return callback(new Error('Not allowed by CORS'));
   },
-  methods: ['GET', 'POST'],
-  credentials: true
+  methods: ['GET', 'POST', 'OPTIONS'],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());

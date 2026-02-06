@@ -6,6 +6,10 @@
 app = 'server-twilight-flower-1963'
 primary_region = 'sin'
 
+[env]
+  NODE_ENV = "production"
+  FRONTEND_URL = "https://social-downloader-delta.vercel.app"
+
 [build]
 
 [http_service]
