@@ -2,10 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Youtube, Link2, Loader2, Download, Music, Video, AlertCircle, CheckCircle, X, ListVideo, Package, Check, Square, CheckSquare } from 'lucide-react';
 import { 
-  fetchYouTubeInfo, downloadYouTubeVideo, fetchYouTubePlaylistInfo, downloadYouTubePlaylist, downloadSelectedPlaylistVideos,
-  fetchYouTubeInfoNoCookies, downloadYouTubeVideoNoCookies
+  fetchYouTubeInfo, downloadYouTubeVideo, fetchYouTubePlaylistInfo, downloadYouTubePlaylist, downloadSelectedPlaylistVideos
 } from '../services/api';
-import { logEndpointCall } from '../utils/debug';
 import Footer from '../components/Footer';
 
 const YouTubePage = () => {
@@ -48,10 +46,7 @@ const YouTubePage = () => {
           }
         }
       } else {
-        // Use cookie-free version in production to avoid 403 errors
-        const fetchFunction = isProduction ? fetchYouTubeInfoNoCookies : fetchYouTubeInfo;
-        logEndpointCall('/youtube/info', isProduction);
-        const response = await fetchFunction(url);
+        const response = await fetchYouTubeInfo(url);
         if (response.success) {
           setVideoInfo(response.data);
           if (response.data.videoFormats?.length > 0) {

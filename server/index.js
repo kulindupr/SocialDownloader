@@ -47,13 +47,25 @@ app.use(cors(corsOptions));
 
 app.use(express.json());
 
-// Routes
+// Routes - Use cookie-free versions by default to avoid 403 errors
 app.use('/api/video', videoRoutes);
-app.use('/api/youtube', youtubeRoutes);
+
+// Override YouTube routes with cookie-free versions
+app.post('/api/youtube/info', getYouTubeInfoNoCookies);
+app.post('/api/youtube/download', downloadYouTubeNoCookies);
+app.use('/api/youtube', youtubeRoutes); // For playlist routes
+
+// Override Instagram routes with cookie-free versions  
+app.post('/api/instagram/info', getInstagramInfoNoCookies);
+app.post('/api/instagram/download', downloadInstagramNoCookies);
 app.use('/api/instagram', instagramRoutes);
+
+// Override TikTok routes with cookie-free versions
+app.post('/api/tiktok/info', getTikTokInfoNoCookies);
+app.post('/api/tiktok/download', downloadTikTokNoCookies);
 app.use('/api/tiktok', tiktokRoutes);
 
-// Cookie-free alternatives (primary routes for deployment)
+// Cookie-free alternatives (explicit endpoints)
 app.post('/api/youtube/info-nocookies', getYouTubeInfoNoCookies);
 app.post('/api/youtube/download-nocookies', downloadYouTubeNoCookies);
 app.post('/api/instagram/info-nocookies', getInstagramInfoNoCookies);

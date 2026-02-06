@@ -8,6 +8,12 @@ import {
   downloadPlaylistToZip,
   downloadSelectedPlaylistToZip
 } from '../utils/ytdlpYoutube.js';
+import { 
+  extractYouTubeInfo as extractYouTubeInfoNoCookies,
+  downloadYouTubeVideo as downloadYouTubeVideoNoCookies
+} from '../utils/ytdlpYoutubeNoCookies.js';
+import { existsSync, statSync, createReadStream, unlinkSync } from 'fs';
+import { basename } from 'path';
 
 // Get YouTube video info
 export const getYouTubeInfo = async (req, res) => {
@@ -24,7 +30,44 @@ export const getYouTubeInfo = async (req, res) => {
       return res.status(400).json({ error: 'Invalid YouTube URL' });
     }
 
-    const info = await extractYouTubeInfo(url);
+    // Try cookie-free version first in production to avoid bot detection
+    let info;
+    try {
+      console.log('🔄 Trying cookie-free YouTube extraction...');
+      info = await extractYouTubeInfoNoCookies(url);
+      console.log('✅ Cookie-free extraction successful');
+    } catch (cookieFreeError) {
+      console.log('❌ Cookie-free extraction failed, falling back to regular method:', cookieFreeError.message);
+      try {
+        info = await extractYouTubeInfo(url);
+        console.log('✅ Regular extraction successful');
+      } catch (regularError) {
+        throw regularError;
+      }
+    }
+
+    // For cookie-free extraction, we get simplified info structure
+    if (info && !info.formats) {
+      res.json({
+        success: true,
+        data: {
+          title: info.title,
+          thumbnail: info.thumbnail,
+          duration: info.duration,
+          duration_string: info.duration_string,
+          channel: info.channel || info.uploader,
+          view_count: info.view_count,
+          description: info.description?.substring(0, 500) + '...',
+          // Add simplified format info for cookie-free
+          videoFormats: [{ height: 720, format_note: 'best available' }],
+          audioFormats: [],
+          formats: [{ height: 720, format_note: 'best available', ext: 'mp4' }]
+        }
+      });
+      return;
+    }
+
+    // Regular extraction with full format parsing
     const { videoFormats, audioFormats, allFormats } = parseYouTubeFormats(info);
 
     res.json({
@@ -49,9 +92,34 @@ export const getYouTubeInfo = async (req, res) => {
     
     const errMsg = error.message?.toLowerCase() || '';
     
-    if (errMsg.includes('sign in') || errMsg.includes('age') || errMsg.includes('confirm your age')) {
-      errorMessage = 'This video requires age verification or sign-in';
-      statusCode = 403;
+    if (errMsg.includes('sign in') || errMsg.includes('age') || errMsg.includes('confirm your age') || errMsg.includes('bot')) {
+      // Try cookie-free extraction for bot detection errors
+      try {
+        console.log('🔄 Retrying with cookie-free extraction due to bot detection...');
+        const info = await extractYouTubeInfoNoCookies(url);
+        
+        res.json({
+          success: true,
+          data: {
+            title: info.title,
+            thumbnail: info.thumbnail,
+            duration: info.duration,
+            duration_string: info.duration_string,
+            channel: info.channel || info.uploader,
+            view_count: info.view_count,
+            description: info.description?.substring(0, 500) + '...',
+            videoFormats: [{ height: 720, format_note: 'best available' }],
+            audioFormats: [],
+            formats: [{ height: 720, format_note: 'best available', ext: 'mp4' }]
+          }
+        });
+        console.log('✅ Cookie-free extraction successful after bot detection');
+        return;
+      } catch (cookieFreeError) {
+        console.log('❌ Cookie-free extraction also failed:', cookieFreeError.message);
+        errorMessage = 'This video requires age verification or sign-in';
+        statusCode = 403;
+      }
     } else if (errMsg.includes('private') || errMsg.includes('unavailable') || errMsg.includes('not available')) {
       errorMessage = 'This video is private or unavailable';
       statusCode = 404;
